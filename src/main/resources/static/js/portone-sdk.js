@@ -320,7 +320,7 @@ async function confirmPaymentTemplate(paymentId) {
     try {
         const result = await makeApiRequest('confirm-payment', {
             method: 'POST',
-            pathParams: { paymentId }
+            pathParams: paymentId  // 단일값 전달 - URL 파라미터 이름과 무관하게 작동
         });
 
         showNotification('결제 확정 성공!', 'success');
@@ -339,7 +339,7 @@ async function cancelPaymentTemplate(paymentId, reason = 'Customer request') {
     try {
         const result = await makeApiRequest('cancel-payment', {
             method: 'POST',
-            pathParams: { paymentId },
+            pathParams: paymentId,  // 단일값 전달 - URL 파라미터 이름과 무관하게 작동
             body: {
                 reason: reason
             }

@@ -96,7 +96,10 @@ async function getConfig() {
 /**
  * 엔드포인트 키로 전체 API URL 생성
  * @param {string} endpointKey - config.api.endpoints의 키
- * @param {Object} params - 경로 파라미터 (예: {orderId: '123'})
+ * @param {Object|Array|string} params - 경로 파라미터
+ *   - Object: {paymentId: 'PAY-123'} - 이름으로 매핑
+ *   - Array: ['PAY-123'] - 순서대로 매핑
+ *   - String: 'PAY-123' - 첫 번째 파라미터에 매핑
  * @returns {Promise<string>} 전체 URL
  */
 async function buildApiUrl(endpointKey, params = {}) {
@@ -110,10 +113,55 @@ async function buildApiUrl(endpointKey, params = {}) {
     // URL 가져오기
     let url = endpointContract.url;
 
-    // 경로 파라미터 치환
-    Object.keys(params).forEach(key => {
-        url = url.replace(`{${key}}`, params[key]);
+    // URL에서 경로 파라미터 이름 추출 (예: /api/payments/{paymentId} → ['paymentId'])
+    const urlParamNames = (url.match(/\{([^}]+)\}/g) || [])
+        .map(p => p.slice(1, -1)); // {paramName} → paramName
+
+    // 파라미터가 없으면 바로 반환
+    if (urlParamNames.length === 0) {
+        return config.api.baseUrl + url;
+    }
+
+    // params를 정규화: string이나 array를 object로 변환
+    let normalizedParams = params;
+
+    if (typeof params === 'string' || typeof params === 'number') {
+        // 단일 값: 첫 번째 파라미터에 매핑
+        normalizedParams = { [urlParamNames[0]]: params };
+    } else if (Array.isArray(params)) {
+        // 배열: 순서대로 매핑
+        normalizedParams = {};
+        urlParamNames.forEach((paramName, index) => {
+            if (index < params.length) {
+                normalizedParams[paramName] = params[index];
+            }
+        });
+    }
+
+    // URL의 모든 경로 파라미터를 치환
+    urlParamNames.forEach(paramName => {
+        if (normalizedParams[paramName] !== undefined && normalizedParams[paramName] !== null) {
+            url = url.replace(`{${paramName}}`, normalizedParams[paramName]);
+        } else {
+            // 파라미터가 제공되지 않은 경우 경고
+            console.warn(
+                `[API Warning] 경로 파라미터 '${paramName}'의 값이 제공되지 않았습니다.\n` +
+                `엔드포인트: ${endpointKey}\n` +
+                `URL 패턴: ${endpointContract.url}\n` +
+                `제공된 파라미터: ${JSON.stringify(params)}`
+            );
+        }
     });
+
+    // 치환되지 않은 파라미터가 남아있는지 확인
+    const remainingParams = url.match(/\{([^}]+)\}/g);
+    if (remainingParams && remainingParams.length > 0) {
+        throw new Error(
+            `URL에 치환되지 않은 경로 파라미터가 있습니다: ${remainingParams.join(', ')}\n` +
+            `엔드포인트: ${endpointKey}\n` +
+            `URL: ${url}`
+        );
+    }
 
     return config.api.baseUrl + url;
 }

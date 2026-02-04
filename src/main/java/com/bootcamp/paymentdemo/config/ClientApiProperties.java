@@ -23,6 +23,7 @@ public class ClientApiProperties {
         private String url;
         private String method;
         private String description;
+        private List<PathParamDefinition> pathParams;
         private RequestSchema request;
         private ResponseSchema response;
     }
@@ -59,6 +60,12 @@ public class ClientApiProperties {
     public static class HeaderDefinition {
         private String name;
         private Boolean required;
+        private String description;
+    }
+
+    @Data
+    public static class PathParamDefinition {
+        private String name;
         private String description;
     }
 }
