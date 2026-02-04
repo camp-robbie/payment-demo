@@ -342,6 +342,7 @@
                     customer: {
                         customerId: currentUser.customerUid,  // PortOne에 전달할 고객 UID
                         fullName: currentUser.name,
+                        phoneNumber: currentUser.phone || '01012345678',  // KG 이니시스 필수
                         email: currentUser.email
                     }
                 };

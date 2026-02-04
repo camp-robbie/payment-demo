@@ -284,7 +284,7 @@
                                     ${order.totalAmount.toLocaleString()}원
                                 </div>
                             </div>
-                            <button class="btn btn-primary" onclick='openPointsModal(${JSON.stringify(order).replace(/'/g, "&#39;")})'>
+                            <button class="btn btn-primary" onclick='openPointsModal("${order.orderId}")'>
                                 💰 포인트로 결제
                             </button>
                         </div>
@@ -296,7 +296,15 @@
         }
 
         // 포인트 모달 열기
-        function openPointsModal(order) {
+        function openPointsModal(orderId) {
+            // orders 배열에서 orderId로 주문 찾기
+            const order = orders.find(o => o.orderId === orderId);
+
+            if (!order) {
+                showNotification('주문을 찾을 수 없습니다', 'error');
+                return;
+            }
+
             selectedOrder = order;
             document.getElementById('modal-order-number').textContent = order.orderNumber;
             document.getElementById('modal-order-amount').textContent = order.totalAmount.toLocaleString() + '원';
@@ -428,23 +436,31 @@
             let step1, step2, step3;
 
             try {
+                const orderToProcess = {
+                    orderId: selectedOrder.orderId,
+                    orderNumber: selectedOrder.orderNumber,
+                    totalAmount: selectedOrder.totalAmount,
+                    currency: selectedOrder.currency || 'KRW'
+                };
+
                 // 모달 닫기
                 closePointsModal();
 
                 // 1단계: 결제 생성 및 PortOne SDK 호출 (openPortOnePayment 사용)
-                const finalAmount = Math.max(0, selectedOrder.totalAmount - points);
+                const finalAmount = Math.max(0, orderToProcess.totalAmount - points);
                 step1 = addPaymentStep(`결제 시작... (포인트: ${points.toLocaleString()}P, 최종 금액: ${finalAmount.toLocaleString()}원)`, 'loading');
 
                 const paymentData = {
-                    orderId: selectedOrder.orderId,
-                    orderName: `주문 ${selectedOrder.orderNumber}`,
-                    totalAmount: selectedOrder.totalAmount,
+                    orderId: orderToProcess.orderId,
+                    orderName: `주문 ${orderToProcess.orderNumber}`,
+                    totalAmount: orderToProcess.totalAmount,
                     pointsToUse: points,  // 포인트 정보 추가
-                    currency: selectedOrder.currency || 'KRW',
+                    currency: orderToProcess.currency,
                     payMethod: 'CARD',
                     customer: {
                         customerId: currentUser.customerUid,
                         fullName: currentUser.name,
+                        phoneNumber: currentUser.phone || '01012345678',  // KG 이니시스 필수
                         email: currentUser.email
                     }
                 };

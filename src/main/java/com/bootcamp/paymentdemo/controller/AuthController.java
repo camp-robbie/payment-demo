@@ -108,6 +108,8 @@ public class AuthController {
         response.put("email", email);
         response.put("customerUid", "CUST_" + Math.abs(email.hashCode()));  // PortOne 고객 UID
         response.put("name", email.split("@")[0]);  // 이메일에서 이름 추출
+        response.put("phone", "010-0000-0000");  // Kg 이니시스 전화번호 필수
+        response.put("pointBalance", 1000L);  // 포인트 잔액
 
         return ResponseEntity.ok(response);
     }

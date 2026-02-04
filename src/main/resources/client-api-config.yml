@@ -94,6 +94,15 @@ api:
               required: true
               description: 사용자 이름
               usage: PortOne payment window customer.fullName
+            - name: phone
+              type: string
+              required: true
+              description: 사용자 전화번호 (KG 이니시스 필수)
+              usage: PortOne payment window customer.phoneNumber
+            - name: pointBalance
+              type: number
+              required: true
+              description: 현재 포인트 잔액
 
     # ========================================
     # 상품 & 주문 (Product & Order)
