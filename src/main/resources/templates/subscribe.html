@@ -116,10 +116,14 @@
     </div>
 
     <script>
-        const plans = {
-            'BASIC': { name: 'Basic', price: 9900, emoji: '🥉' },
-            'PRO': { name: 'Pro', price: 19900, emoji: '🥈' },
-            'MAX': { name: 'Max', price: 29900, emoji: '🥇' }
+        // 플랜 정보 (서버에서 로드)
+        let plans = null;
+
+        // 플랜 이모지 매핑
+        const planEmojis = {
+            'BASIC': '🥉',
+            'PRO': '🥈',
+            'MAX': '🥇'
         };
 
         // 현재 사용자 정보 (서버에서 로드)
@@ -147,8 +151,55 @@
             }
         }
 
+        // 플랜 목록 로드
+        async function loadPlans() {
+            try {
+                const plansArray = await makeApiRequest('list-plans', {
+                    method: 'GET'
+                });
+
+                if (!validateApiResponse('list-plans', plansArray)) {
+                    throw new Error('API 응답 형식이 올바르지 않습니다.');
+                }
+
+                // 배열을 객체로 변환 (planId를 그대로 키로 사용)
+                plans = {};
+                plansArray.forEach(plan => {
+                    // planId를 그대로 사용 (어떤 형식이든 상관없음: PLAN-PRO, PRO, 1, etc.)
+                    plans[plan.planId] = {
+                        planId: plan.planId,
+                        name: plan.name,
+                        price: plan.amount,
+                        billingCycle: plan.billingCycle,
+                        // 이모지 매핑: name 기반 또는 기본값
+                        emoji: planEmojis[plan.name.toUpperCase()] || planEmojis[plan.planId] || '📦'
+                    };
+                });
+
+                console.log('Loaded plans:', plans);
+            } catch (error) {
+                console.error('Failed to load plans:', error);
+
+                // API 미구현 메시지 표시
+                const mainContent = document.querySelector('.container');
+                mainContent.innerHTML = `
+                    <div class="alert alert-warning" style="margin-top: 2rem;">
+                        <h3>⚠️ API 미구현</h3>
+                        <p><strong>GET /api/plans</strong> 엔드포인트를 구현해주세요.</p>
+                        <p>구독 플랜 목록을 조회하는 API가 필요합니다.</p>
+                        <p style="margin-top: 1rem;">
+                            <a href="/pages/plans" class="btn btn-primary">플랜 목록으로 돌아가기</a>
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
         // 페이지 로드 시 실행
-        document.addEventListener('DOMContentLoaded', loadCurrentUser);
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCurrentUser();
+            await loadPlans();
+        });
 
         // URL에서 palnId 가져오기
         const urlParams = new URLSearchParams(window.location.search);
@@ -162,8 +213,34 @@
             updatePlanDetails(e.target.value);
         });
 
-        function updatePlanDetails(planId) {
-            const plan = plans[planId.toUpperCase()];
+        // 플랜 찾기 헬퍼 (유연한 매칭: 정확한 일치 → name 일치 → 부분 일치)
+        function findPlan(searchKey) {
+            if (!plans || !searchKey) return null;
+
+            // 1. 정확한 planId 일치
+            if (plans[searchKey]) return plans[searchKey];
+
+            // 2. 대소문자 무시 planId 일치
+            const lowerSearch = searchKey.toLowerCase();
+            for (const [planId, plan] of Object.entries(plans)) {
+                if (planId.toLowerCase() === lowerSearch) return plan;
+            }
+
+            // 3. name 일치 (예: "PRO" → name이 "Pro"인 플랜)
+            for (const plan of Object.values(plans)) {
+                if (plan.name.toUpperCase() === searchKey.toUpperCase()) return plan;
+            }
+
+            // 4. planId에 검색키가 포함된 경우 (예: "PRO" → "PLAN-PRO")
+            for (const [planId, plan] of Object.entries(plans)) {
+                if (planId.toUpperCase().includes(searchKey.toUpperCase())) return plan;
+            }
+
+            return null;
+        }
+
+        function updatePlanDetails(searchKey) {
+            const plan = findPlan(searchKey);
             const detailsDiv = document.getElementById('plan-details');
 
             if (plan) {
@@ -183,9 +260,12 @@
         // 통합 구독 신청 플로우
         // ========================================
         async function startSubscription() {
-            const planId = document.getElementById('plan-id').value.trim().toUpperCase();
+            const planIdInput = document.getElementById('plan-id').value.trim();
 
-            if (!planId || !plans[planId]) {
+            // 유연한 플랜 찾기 (어떤 planId 형식이든 매칭)
+            const plan = findPlan(planIdInput);
+
+            if (!plan) {
                 showNotification('⚠️ Please select a valid plan', 'warning');
                 return;
             }
@@ -213,7 +293,7 @@
 
                 const billingKeyData = {
                     issueId: `issue_${Date.now()}`,
-                    issueName: `${plans[planId].name} Plan Subscription`,
+                    issueName: `${plan.name} Plan Subscription`,
                     billingKeyMethod: 'CARD',
                     customer: {
                         customerId: currentUser.customerUid,
@@ -244,9 +324,9 @@
                         method: 'POST',
                         body: {
                             customerUid: currentUser.customerUid,
-                            planId: planId,
+                            planId: plan.planId,  // API에서 받은 planId 그대로 전송
                             billingKey: billingKey,
-                            amount: plans[planId].price
+                            amount: plan.price
                         }
                     });
                 } catch (apiError) {
