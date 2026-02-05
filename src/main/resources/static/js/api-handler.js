@@ -7,11 +7,11 @@
  * API 요청을 수행하고 패널에 표시
  * @param {string} endpointKey - 설정의 엔드포인트 키
  * @param {Object} options - Fetch 옵션 (method, body, params, returnHeaders)
+ *   - method: HTTP 메서드 (생략 시 YAML 설정에서 자동으로 가져옴)
  * @returns {Promise<Object>} 응답 데이터 (returnHeaders가 true면 { data, headers })
  */
 async function makeApiRequest(endpointKey, options = {}) {
     const {
-        method = 'GET',
         body = null,
         params = {},
         pathParams = {},
@@ -19,6 +19,17 @@ async function makeApiRequest(endpointKey, options = {}) {
     } = options;
 
     try {
+        // 설정에서 엔드포인트 계약 가져오기
+        const config = await getConfig();
+        const endpointContract = config.api.endpoints[endpointKey];
+
+        if (!endpointContract) {
+            throw new Error(`엔드포인트 '${endpointKey}'를 설정에서 찾을 수 없습니다`);
+        }
+
+        // method를 YAML 설정에서 자동으로 가져옴 (options에서 override 가능)
+        const method = options.method || endpointContract.method || 'GET';
+
         // URL 생성
         const url = await buildApiUrl(endpointKey, pathParams);
 

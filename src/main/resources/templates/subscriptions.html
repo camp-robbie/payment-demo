@@ -167,8 +167,7 @@
 
             try {
                 const subscription = await makeApiRequest('get-subscription', {
-                    method: 'GET',
-                    pathParams: subscriptionId  // 단일값 전달
+                    pathParams: subscriptionId
                 });
 
                 // 구독 정보 표시
@@ -222,8 +221,7 @@
                 const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 
                 await makeApiRequest('create-billing', {
-                    method: 'POST',
-                    pathParams: subscriptionId,  // 단일값 전달
+                    pathParams: subscriptionId,
                     body: {
                         periodStart: periodStart.toISOString(),
                         periodEnd: periodEnd.toISOString()
@@ -253,8 +251,7 @@
 
             try {
                 const result = await makeApiRequest('list-billing-history', {
-                    method: 'GET',
-                    pathParams: subscriptionId  // 단일값 전달
+                    pathParams: subscriptionId
                 });
 
                 // Display billing history
@@ -324,8 +321,7 @@
 
             try {
                 await makeApiRequest('update-subscription', {
-                    method: 'PATCH',
-                    pathParams: subscriptionId,  // 단일값 전달
+                    pathParams: subscriptionId,
                     body: {
                         action: 'cancel',
                         reason: 'Customer request'
