@@ -215,7 +215,6 @@
         async function loadCurrentUser() {
             try {
                 currentUser = await makeApiRequest('get-current-user', {
-                    method: 'GET'
                 });
 
                 if (!validateApiResponse('get-current-user', currentUser)) {
@@ -235,7 +234,6 @@
 
             try {
                 const result = await makeApiRequest('list-orders', {
-                    method: 'GET'
                 });
 
                 // YML 스키마 기반 자동 검증

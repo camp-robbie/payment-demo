@@ -133,7 +133,6 @@
         async function loadCurrentUser() {
             try {
                 currentUser = await makeApiRequest('get-current-user', {
-                    method: 'GET'
                 });
 
                 // YML 스키마 기반 자동 검증
@@ -155,7 +154,6 @@
         async function loadPlans() {
             try {
                 const plansArray = await makeApiRequest('list-plans', {
-                    method: 'GET'
                 });
 
                 if (!validateApiResponse('list-plans', plansArray)) {
@@ -321,7 +319,6 @@
                 let subscriptionResult;
                 try {
                     subscriptionResult = await makeApiRequest('create-subscription', {
-                        method: 'POST',
                         body: {
                             customerUid: currentUser.customerUid,
                             planId: plan.planId,  // API에서 받은 planId 그대로 전송

@@ -78,7 +78,6 @@
             try {
                 // returnHeaders: true 옵션으로 헤더도 받아오기
                 const result = await makeApiRequest('login', {
-                    method: 'POST',
                     body: {
                         email: email,
                         password: password

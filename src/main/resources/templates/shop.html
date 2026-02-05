@@ -105,7 +105,6 @@
         async function loadCurrentUser() {
             try {
                 currentUser = await makeApiRequest('get-current-user', {
-                    method: 'GET'
                 });
 
                 // YML 스키마 기반 자동 검증
@@ -122,7 +121,6 @@
         async function loadProductsFromApi() {
             try {
                 const result = await makeApiRequest('list-products', {
-                    method: 'GET'
                 });
 
                 // YML 스키마 기반 자동 검증
@@ -312,7 +310,6 @@
 
             try {
                 const result = await makeApiRequest('create-order', {
-                    method: 'POST',
                     body: orderData
                 });
 

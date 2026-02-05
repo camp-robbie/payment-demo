@@ -204,7 +204,6 @@
         async function loadCurrentUser() {
             try {
                 currentUser = await makeApiRequest('get-current-user', {
-                    method: 'GET'
                 });
 
                 if (!validateApiResponse('get-current-user', currentUser)) {
@@ -220,7 +219,6 @@
         async function loadOrders() {
             try {
                 const result = await makeApiRequest('list-orders', {
-                    method: 'GET'
                 });
 
                 if (!validateApiResponse('list-orders', result)) {

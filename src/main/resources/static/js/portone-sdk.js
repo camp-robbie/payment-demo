@@ -39,7 +39,6 @@ async function openPortOnePayment(paymentData) {
         // 1단계: 서버에 결제 시작 요청 (PENDING 상태로 DB 저장)
         console.log('1단계: 서버에 결제 시작 요청...');
         const createPaymentResult = await makeApiRequest('create-payment', {
-            method: 'POST',
             body: {
                 orderId: paymentData.orderId,
                 totalAmount: paymentData.totalAmount
@@ -143,7 +142,6 @@ async function openPortOnePaymentWithPoints(paymentData) {
         // 1단계: 서버에 결제 시작 요청 (PENDING 상태로 DB 저장, 포인트 포함)
         console.log('1단계: 서버에 결제 시작 요청 (포인트 포함)...');
         const createPaymentResult = await makeApiRequest('create-payment', {
-            method: 'POST',
             body: {
                 orderId: paymentData.orderId,
                 totalAmount: paymentData.totalAmount,

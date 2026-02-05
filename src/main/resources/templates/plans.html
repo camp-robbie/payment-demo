@@ -118,7 +118,6 @@
         async function loadPlans() {
             try {
                 const plans = await makeApiRequest('list-plans', {
-                    method: 'GET'
                 });
 
                 if (!validateApiResponse('list-plans', plans)) {
