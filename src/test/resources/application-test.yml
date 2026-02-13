@@ -1,0 +1,39 @@
+spring:
+  datasource:
+    url: jdbc:tc:mysql:8.3:///testdb
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    show-sql: true
+
+  # 테스트에서는 client-api-config.yml import 비활성화
+  config:
+    import: ""
+
+jwt:
+  secret: test-secret-key-for-jwt-token-must-be-at-least-256-bits-long-for-hmac-sha
+  token-validity-in-seconds: 3600
+
+portone:
+  api:
+    base-url: https://api.portone.io
+    secret: test-portone-secret
+  store:
+    id: test-store-id
+  channel:
+    kg-inicis: test-kg-channel
+    toss: test-toss-channel
+
+logging:
+  level:
+    com.bootcamp.paymentdemo: DEBUG
+    org.springframework.security: DEBUG
+    org.testcontainers: INFO

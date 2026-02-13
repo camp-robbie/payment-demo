@@ -50,10 +50,55 @@ dependencies {
 
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // TestContainers
+    testImplementation platform('org.testcontainers:testcontainers-bom:1.20.4')
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mysql'
+
+    // MySQL 드라이버
+    testRuntimeOnly 'com.mysql:mysql-connector-j'
+
+    // Test Lombok 지원
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
+// 기본 test task: 단위 테스트만 (integration, e2e 태그 제외)
 tasks.named('test') {
+    useJUnitPlatform {
+        excludeTags 'integration', 'e2e'
+    }
+}
+
+// 통합 테스트 task (e2e 제외)
+tasks.register('integrationTest', Test) {
+    useJUnitPlatform {
+        includeTags 'integration'
+        excludeTags 'e2e'
+    }
+}
+
+// E2E 테스트 task
+tasks.register('e2eTest', Test) {
+    useJUnitPlatform {
+        includeTags 'e2e'
+    }
+}
+
+// 전체 테스트 task
+tasks.register('allTest', Test) {
     useJUnitPlatform()
+}
+
+// 모든 Test 타입 task에 결과 출력 설정
+tasks.withType(Test).configureEach {
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        showStandardStreams = false
+        exceptionFormat 'short'
+    }
 }
