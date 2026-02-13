@@ -9,13 +9,10 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -65,6 +62,9 @@ public class SecurityConfig {
                     // 4) 인증 API
                     .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
 
+                    // H2 콘솔
+                    .requestMatchers("/h2-console/**").permitAll()
+
                     // 5) 그 외 API는 인증 필요
                     .requestMatchers("/api/**").authenticated()
 
@@ -73,7 +73,8 @@ public class SecurityConfig {
             )
 
             // JWT 필터 추가
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 
         return http.build();
     }
@@ -84,20 +85,6 @@ public class SecurityConfig {
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    /**
-     * Admin 계정 (InMemory - 데모용)
-     */
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails admin = User.builder()
-            .username("admin@test.com")
-            .password(passwordEncoder.encode("admin"))
-            .roles("USER", "ADMIN")
-            .build();
-
-        return new InMemoryUserDetailsManager(admin);
     }
 
     @Bean
