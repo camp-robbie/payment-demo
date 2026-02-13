@@ -90,8 +90,8 @@
     <script>
         // 참고용: API 응답 예시 구조
         // [
-        //     { id: 'PROD001', name: '프리미엄 무선 이어폰', price: 89000, stock: 50 },
-        //     { id: 'PROD002', name: '스마트 워치', price: 299000, stock: 30 },
+        //     { id: 101, name: '프리미엄 무선 이어폰', price: 89000, stock: 50 },
+        //     { id: 102, name: '스마트 워치', price: 299000, stock: 30 },
         //     ...
         // ]
 
@@ -177,11 +177,11 @@
                         <div class="price">₩${product.price.toLocaleString()}</div>
                         <div style="margin: 0.5rem 0; font-size: 0.9rem;">${stockStatus}</div>
                         <div class="quantity-control">
-                            <button class="quantity-btn" onclick="updateQuantity('${product.id}', -1)"
+                            <button class="quantity-btn" onclick="updateQuantity(${product.id}, -1)"
                                 ${product.stock === 0 ? 'disabled' : ''}>-</button>
                             <input type="number" class="quantity-input" id="qty-${product.id}"
                                 value="0" min="0" max="${product.stock}" readonly>
-                            <button class="quantity-btn" onclick="updateQuantity('${product.id}', 1)"
+                            <button class="quantity-btn" onclick="updateQuantity(${product.id}, 1)"
                                 ${product.stock === 0 ? 'disabled' : ''}>+</button>
                         </div>
                     </div>
@@ -190,7 +190,7 @@
         }
 
         function updateQuantity(productId, delta) {
-            const product = products.find(p => p.id === productId);
+            const product = products.find(p => p.id == productId);
             if (!product) return;
 
             const input = document.getElementById(`qty-${productId}`);
@@ -219,7 +219,7 @@
             Object.keys(cart).forEach(productId => {
                 const qty = cart[productId];
                 if (qty > 0) {
-                    const product = products.find(p => p.id === productId);
+                    const product = products.find(p => p.id == productId);
                     const subtotal = product.price * qty;
                     total += subtotal;
                     html += `
@@ -286,7 +286,7 @@
                 const qty = cart[productId];
                 if (qty > 0) {
                     items.push({
-                        productId: productId,
+                        productId: Number(productId),
                         quantity: qty
                     });
                 }
